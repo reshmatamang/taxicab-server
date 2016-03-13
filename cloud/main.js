@@ -83,7 +83,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
     9 : 'driver-reached-destination',
     10: 'driver-canceled-trip-request'
   };
-  var q1 = new Parse.Query("_User");
+  var q1 = new Parse.Query(Parse.User);
   var user, driver;
   var promise1 = q1.get(userId, {
     success: function (obj) {
@@ -102,7 +102,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
 
   promises.push(promise1);
 
-  var q2 = new Parse.Query("_User");
+  var q2 = new Parse.Query(Parse.User);
   var promise2 = q2.get(driverId, {
     success: function (obj) {
       console.log("drive");
@@ -139,10 +139,10 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
           driver.add("currentTripId", savedTrip.get("objectId"));
           user.save();
           driver.save();
+          res.success(savedTrip);
           Parse.Cloud.run('pushData', {
             'ownerId': driver.get('objectId')
           });
-          res.success(savedTrip);
 
         }, function (error) {
           res.error(error);
