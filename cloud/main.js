@@ -1,6 +1,6 @@
 Parse.Cloud.define('pushData', function(request, response) {
   var params = request.params;
-  var ownerId = params.ownerId;
+  var ownerId = request.ownerId;
 
   // To be used with:
   // https://github.com/codepath/ParsePushNotificationExample
