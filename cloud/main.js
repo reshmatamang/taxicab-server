@@ -9,9 +9,11 @@ Parse.Cloud.define('pushData', function(request, response) {
   var launch = params.launch;
   var broadcast = params.broadcast;
 
+  console.log("OwnerId: " + ownerId);
+
   // use to custom tweak whatever payload you wish to send
   var pushQuery = new Parse.Query(Parse.Installation);
-  pushQuery.equalTo("deviceType", "android");
+  // pushQuery.equalTo("deviceType", "android");
   pushQuery.equalTo("ownerId", ownerId);
 
   var payload = {};
