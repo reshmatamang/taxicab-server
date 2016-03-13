@@ -32,6 +32,14 @@ Parse.Cloud.define('pushChannelTest', function(request, response) {
 
   // Note that useMasterKey is necessary for Push notifications to succeed.
 
+pushQuery.find({
+  success: function(result) {
+    console.log("installations" + result);
+  }, error: function(error) {
+    console.log("error" + error);
+
+  }
+});
   Parse.Push.send({
   where: pushQuery,      // for sending to a specific channel
   data: payload,
