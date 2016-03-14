@@ -43,30 +43,30 @@ Parse.Cloud.define('pushData', function(request, response) {
      useMasterKey: true
    });
 
-  var setConfirm = function(tripId) {
+  // var setConfirm = function(tripId) {
 
-    var qr = new Parse.Query("Trip");
+  //   var qr = new Parse.Query("Trip");
 
-    console.log("tripId: " + tripId);
+  //   console.log("tripId: " + tripId);
 
-    var pr = qr.get(tripId, {
-      success: function (obj) {
-        console.log("success trip");
-        trip = obj;
-        trip.set("status", "confirmed");
-        // promise1.resolve(obj);
-      },
-      error: function (obj, error) {
-        console.log("error trip");
-        console.log(error);
-        // promise1.reject(error);
-      }
-    });
-  };
+  //   var pr = qr.get(tripId, {
+  //     success: function (obj) {
+  //       console.log("success trip");
+  //       trip = obj;
+  //       trip.set("status", "confirmed");
+  //       // promise1.resolve(obj);
+  //     },
+  //     error: function (obj, error) {
+  //       console.log("error trip");
+  //       console.log(error);
+  //       // promise1.reject(error);
+  //     }
+  //   });
+  // };
 
-  console.log("tripID before timeout: " + tripId);
+  // console.log("tripID before timeout:" + tripId);
 
-  setTimeout(setConfirm, 30000, tripId);
+  // setTimeout(setConfirm, 30000, tripId);
 
   response.success('success');
 });
@@ -169,41 +169,37 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
         trip.set("user", user); 
         trip.set("driver", driver);
         trip.set("state", 'user-initiated-trip-request');
-        trip.set("status", 'requested');
+        // trip.set("status", 'requested');
 
-        trip.save({
+        trip.set("status", 'confirmed');
+
+        trip.save().then(function (savedTrip) {
+          //trip saved
+          var tripId = savedTrip.get("objectId");
+          user.set("currentTripId", tripId);
+          driver.set("currentTripId", tripId);
+          user.save();
+          driver.save();
+          res.success(savedTrip);
+          Parse.Cloud.run('pushData', {
+            ownerId: driverId,
+            tripId: tripId,
+            customData: {
+              userId: userId,
+              "text": "User requesting for taxi. Can you pick this user?"
+            }
+          },{
             success: function (result) {
               console.log(result);
-              //trip saved
-              res.success(result);
-
-              var tripId = result.get("objectId");
-              console.log("TripId after trip create: "+ tripId);
-              user.set("currentTripId", tripId);
-              driver.set("currentTripId", tripId);
-              user.save();
-              driver.save();
-              Parse.Cloud.run('pushData', {
-                ownerId: driverId,
-                tripId: tripId,
-                customData: {
-                  userId: userId,
-                  "text": "User requesting for taxi. Can you pick this user?"
-                }
-              },{
-                success: function (result) {
-                  console.log(result);
-                },
-                error: function (error) {
-                  console.log(error);
-                }
-              });
             },
             error: function (error) {
               console.log(error);
-              res.error(error);
             }
           });
+
+        }, function (error) {
+          res.error(error);
+        });
       } else {
         res.error("Requested driver not available. Please select another driver");
       }
