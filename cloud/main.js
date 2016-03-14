@@ -173,33 +173,70 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
 
         trip.set("status", 'confirmed');
 
-        trip.save().then(function (savedTrip) {
-          //trip saved
-          var tripId = savedTrip.get("objectId");
-          user.set("currentTripId", tripId);
-          driver.set("currentTripId", tripId);
-          user.save();
-          driver.save();
-          res.success(savedTrip);
-          Parse.Cloud.run('pushData', {
-            ownerId: driverId,
-            tripId: tripId,
-            customData: {
-              userId: userId,
-              "text": "User requesting for taxi. Can you pick this user?"
-            }
-          },{
-            success: function (result) {
-              console.log(result);
-            },
-            error: function (error) {
-              console.log(error);
-            }
-          });
+        trip.save({
+          user: user,
+          driver: driver,
+          state: 'user-initiated-trip-request',
+          status: 'confirmed'
+        }, {
+          success: function(savedTrip) {
+            //trip saved
+            res.success(savedTrip);
 
-        }, function (error) {
-          res.error(error);
-        });
+            var tripId = savedTrip.get("objectId");
+            user.set("currentTripId", tripId);
+            driver.set("currentTripId", tripId);
+            user.save();
+            driver.save();
+            
+            //push data to driver
+            Parse.Cloud.run('pushData', {
+              ownerId: driverId,
+              tripId: tripId,
+              customData: {
+                userId: userId,
+                "text": "User requesting for taxi. Can you pick this user?"
+              }
+            },{
+              success: function (result) {
+                console.log(result);
+              },
+              error: function (error) {
+                console.log(error);
+              }
+            });
+
+          }, error: function(error) {
+              res.error(error);
+          }
+          });
+// .then(function (savedTrip) {
+//           //trip saved
+//           var tripId = savedTrip.get("objectId");
+//           user.set("currentTripId", tripId);
+//           driver.set("currentTripId", tripId);
+//           user.save();
+//           driver.save();
+//           res.success(savedTrip);
+//           Parse.Cloud.run('pushData', {
+//             ownerId: driverId,
+//             tripId: tripId,
+//             customData: {
+//               userId: userId,
+//               "text": "User requesting for taxi. Can you pick this user?"
+//             }
+//           },{
+//             success: function (result) {
+//               console.log(result);
+//             },
+//             error: function (error) {
+//               console.log(error);
+//             }
+//           });
+
+//         }, function (error) {
+//           res.error(error);
+//         });
       } else {
         res.error("Requested driver not available. Please select another driver");
       }
