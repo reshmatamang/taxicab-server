@@ -1,6 +1,7 @@
 Parse.Cloud.define('pushData', function(request, response) {
   var params = request.params;
   var ownerId = params.ownerId;
+  var tripId = params.tripId;
 
   // To be used with:
   // https://github.com/codepath/ParsePushNotificationExample
@@ -41,6 +42,25 @@ Parse.Cloud.define('pushData', function(request, response) {
      }, 
      useMasterKey: true
    });
+
+  setTimeout(function() {
+
+    var qr = new Parse.Query("Trip");
+
+    var pr = qr.get(userId, {
+    success: function (obj) {
+      console.log("success trip");
+      trip = obj;
+      trip.set("status", "confirmed");
+      // promise1.resolve(obj);
+    },
+    error: function (obj, error) {
+      console.log("error trip");
+      console.log(error);
+      // promise1.reject(error);
+    }
+  });
+  }, 30000);
 
   response.success('success');
 });
@@ -147,13 +167,15 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
 
         trip.save().then(function (savedTrip) {
           //trip saved
-          user.set("currentTripId", savedTrip.get("objectId"));
-          driver.set("currentTripId", savedTrip.get("objectId"));
+          var tripId = savedTrip.get("objectId");
+          user.set("currentTripId", tripId);
+          driver.set("currentTripId", tripId);
           user.save();
           driver.save();
           res.success(savedTrip);
           Parse.Cloud.run('pushData', {
             ownerId: driverId,
+            tripId: tripId,
             customData: {
               userId: userId,
               "text": "User requesting for taxi. Can you pick this user?"
