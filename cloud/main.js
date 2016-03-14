@@ -49,6 +49,13 @@ Parse.Cloud.define('pushData', function(request, response) {
 
 
 /**
+TripStatus:
+'requested',
+'accepted',
+'driver-notfound',
+'error'
+
+
 Trip States:
 'user-initiated-trip-request'
 'user-canceled-trip-request'
@@ -69,8 +76,8 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
   var driverId = req.params.driverId;
   var promises = [];
 
-  var ProjectNumner = "956242433297".
-      key = "AIzaSyDS4GAwSpVgPOQpDiTwNxeSSpMotTP-9WQ";
+  // var ProjectNumner = "956242433297".
+  //     key = "AIzaSyDS4GAwSpVgPOQpDiTwNxeSSpMotTP-9WQ";
 
   var tripStates = {
     0 : 'user-initiated-trip-request',
@@ -85,6 +92,8 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
     9 : 'driver-reached-destination',
     10: 'driver-canceled-trip-request'
   };
+
+  //get user
   var q1 = new Parse.Query(Parse.User);
   var user, driver;
   var promise1 = q1.get(userId, {
@@ -131,14 +140,15 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
         //ceate new trip object
 
         var trip = new Parse.Object("Trip");
-        trip.add("user", user); 
-        trip.add("driver", driver);
-        trip.add("state", tripStates[0]);
+        trip.set("user", user); 
+        trip.set("driver", driver);
+        trip.set("state", 'user-initiated-trip-request');
+        trip.set("status", 'requested');
 
         trip.save().then(function (savedTrip) {
           //trip saved
-          user.add("currentTripId", savedTrip.get("objectId"));
-          driver.add("currentTripId", savedTrip.get("objectId"));
+          user.set("currentTripId", savedTrip.get("objectId"));
+          driver.set("currentTripId", savedTrip.get("objectId"));
           user.save();
           driver.save();
           res.success(savedTrip);
