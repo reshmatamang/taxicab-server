@@ -171,33 +171,39 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
         trip.set("state", 'user-initiated-trip-request');
         trip.set("status", 'requested');
 
-        trip.save().then(function (savedTrip) {
-          //trip saved
-          var tripId = savedTrip.get("objectId");
-          user.set("currentTripId", tripId);
-          driver.set("currentTripId", tripId);
-          user.save();
-          driver.save();
-          res.success(savedTrip);
-          Parse.Cloud.run('pushData', {
-            ownerId: driverId,
-            tripId: tripId,
-            customData: {
-              userId: userId,
-              "text": "User requesting for taxi. Can you pick this user?"
-            }
-          },{
+        trip.save({
             success: function (result) {
               console.log(result);
+              //trip saved
+              res.success(savedTrip);
+
+              var tripId = savedTrip.get("objectId");
+              console.log("TripId after trip create: "+ tripId);
+              user.set("currentTripId", tripId);
+              driver.set("currentTripId", tripId);
+              user.save();
+              driver.save();
+              Parse.Cloud.run('pushData', {
+                ownerId: driverId,
+                tripId: tripId,
+                customData: {
+                  userId: userId,
+                  "text": "User requesting for taxi. Can you pick this user?"
+                }
+              },{
+                success: function (result) {
+                  console.log(result);
+                },
+                error: function (error) {
+                  console.log(error);
+                }
+              });
             },
             error: function (error) {
               console.log(error);
+              res.error(error);
             }
           });
-
-        }, function (error) {
-          res.error(error);
-        });
       } else {
         res.error("Requested driver not available. Please select another driver");
       }
