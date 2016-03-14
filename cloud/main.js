@@ -1,6 +1,6 @@
 Parse.Cloud.define('pushData', function(request, response) {
   var params = request.params;
-  var ownerId = request.ownerId;
+  var ownerId = params.ownerId;
 
   // To be used with:
   // https://github.com/codepath/ParsePushNotificationExample
@@ -143,7 +143,14 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
           driver.save();
           res.success(savedTrip);
           Parse.Cloud.run('pushData', {
-            'ownerId': driver.get('objectId')
+            ownerId: driverId
+          },{
+            success: function (result) {
+              console.log(result);
+            },
+            error: function (error) {
+              console.log(error);
+            }
           });
 
         }, function (error) {
