@@ -43,26 +43,30 @@ Parse.Cloud.define('pushData', function(request, response) {
      useMasterKey: true
    });
 
-  setTimeout(function() {
+  var setConfirm = function(tripId) {
 
     var qr = new Parse.Query("Trip");
 
     console.log("tripId: " + tripId);
 
     var pr = qr.get(tripId, {
-    success: function (obj) {
-      console.log("success trip");
-      trip = obj;
-      trip.set("status", "confirmed");
-      // promise1.resolve(obj);
-    },
-    error: function (obj, error) {
-      console.log("error trip");
-      console.log(error);
-      // promise1.reject(error);
-    }
-  });
-  }, 30000);
+      success: function (obj) {
+        console.log("success trip");
+        trip = obj;
+        trip.set("status", "confirmed");
+        // promise1.resolve(obj);
+      },
+      error: function (obj, error) {
+        console.log("error trip");
+        console.log(error);
+        // promise1.reject(error);
+      }
+    });
+  };
+
+  console.log("tripID before timeout: " + tripId);
+
+  setTimeout(setConfirm, 30000, tripId);
 
   response.success('success');
 });
