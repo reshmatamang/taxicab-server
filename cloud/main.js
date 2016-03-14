@@ -47,6 +47,8 @@ Parse.Cloud.define('pushData', function(request, response) {
 
     var qr = new Parse.Query("Trip");
 
+    console.log("tripId: " + tripId);
+
     var pr = qr.get(tripId, {
     success: function (obj) {
       console.log("success trip");
