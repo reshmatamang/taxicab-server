@@ -143,7 +143,11 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
           driver.save();
           res.success(savedTrip);
           Parse.Cloud.run('pushData', {
-            ownerId: driverId
+            ownerId: driverId,
+            customData: {
+              userId: userId,
+              "text": "User requesting for taxi. Can you pick this user?"
+            }
           },{
             success: function (result) {
               console.log(result);
