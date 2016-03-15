@@ -190,6 +190,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             user.save();
             driver.save();
             
+            
             //push data to driver
             Parse.Cloud.run('pushData', {
               ownerId: driverId,
