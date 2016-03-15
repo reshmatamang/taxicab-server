@@ -2,6 +2,7 @@ Parse.Cloud.define('pushData', function(request, response) {
   var params = request.params;
   var ownerId = params.ownerId;
   var tripId = params.tripId;
+  // var trip = params.trip;
 
   // To be used with:
   // https://github.com/codepath/ParsePushNotificationExample
@@ -193,8 +194,10 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             Parse.Cloud.run('pushData', {
               ownerId: driverId,
               tripId: tripId,
+              // trip: JSON.stringify(savedTrip),
               customData: {
                 userId: userId,
+                tripId: tripId,
                 "text": "User requesting for taxi. Can you pick this user?"
               }
             },{
