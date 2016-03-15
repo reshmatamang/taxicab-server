@@ -1,7 +1,7 @@
 Parse.Cloud.define('pushData', function(request, response) {
   var params = request.params;
   var ownerId = params.ownerId;
-  var tripId = params.tripId;
+  // var tripId = params.tripId;
   // var trip = params.trip;
 
   // To be used with:
@@ -189,12 +189,11 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             driver.set("currentTripId", tripId);
             user.save();
             driver.save();
-            
+
             
             //push data to driver
             Parse.Cloud.run('pushData', {
               ownerId: driverId,
-              tripId: tripId,
               // trip: JSON.stringify(savedTrip),
               customData: {
                 userId: userId,
