@@ -163,7 +163,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
       console.log(driver);
     if (user && driver) {
       
-      if (driver.get('state') == 'active') {
+      // if (driver.get('state') == 'active') {
         //ceate new trip object
 
         var trip = new Parse.Object("Trip");
@@ -213,36 +213,9 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
               res.error(error);
           }
           });
-// .then(function (savedTrip) {
-//           //trip saved
-//           var tripId = savedTrip.get("objectId");
-//           user.set("currentTripId", tripId);
-//           driver.set("currentTripId", tripId);
-//           user.save();
-//           driver.save();
-//           res.success(savedTrip);
-//           Parse.Cloud.run('pushData', {
-//             ownerId: driverId,
-//             tripId: tripId,
-//             customData: {
-//               userId: userId,
-//               "text": "User requesting for taxi. Can you pick this user?"
-//             }
-//           },{
-//             success: function (result) {
-//               console.log(result);
-//             },
-//             error: function (error) {
-//               console.log(error);
-//             }
-//           });
-
-//         }, function (error) {
-//           res.error(error);
-//         });
-      } else {
-        res.error("Requested driver not available. Please select another driver");
-      }
+      // } else {
+      //   res.error("Requested driver not available. Please select another driver");
+      // }
       
     } else {
       res.error("Error while initiating the request");
