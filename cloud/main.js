@@ -167,12 +167,10 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
         //ceate new trip object
 
         var trip = new Parse.Object("Trip");
-        trip.set("user", user); 
-        trip.set("driver", driver);
-        trip.set("state", 'user-initiated-trip-request');
+        // trip.set("user", user); 
+        // trip.set("driver", driver);
+        // trip.set("state", 'user-initiated-trip-request');
         // trip.set("status", 'requested');
-
-        trip.set("status", 'confirmed');
 
         trip.save({
           user: user,
@@ -184,7 +182,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             //trip saved
             res.success(savedTrip);
 
-            var tripId = savedTrip.get("objectId");
+            var tripId = savedTrip.get("objectId")||"12345";
             user.set("currentTripId", tripId);
             driver.set("currentTripId", tripId);
             user.save();
