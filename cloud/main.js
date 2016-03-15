@@ -257,7 +257,7 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
 
   promises.push(promise1);
 
-  var q2 = new Parse.Query("Trip";
+  var q2 = new Parse.Query("Trip");
   var promise2 = q2.get(tripId, {
     success: function (obj) {
       console.log("trip");
@@ -327,7 +327,7 @@ Clud Function for Driver Denying Trip request
 
   promises.push(promise1);
 
-  var q2 = new Parse.Query("Trip";
+  var q2 = new Parse.Query("Trip");
   var promise2 = q2.get(tripId, {
     success: function (obj) {
       console.log("trip");
@@ -427,7 +427,7 @@ var driverAssignJob = function (trip) {
         driverAssignJob(trip);
       }
     });
-    trip.set('driver', );
+    trip.set('driver', '');
   }
 };
 
