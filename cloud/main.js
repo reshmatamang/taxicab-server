@@ -350,7 +350,7 @@ Clud Function for Driver Denying Trip request
       trip.save({
       }, {
         success: function () {
-          res.success("Trip denied for this driver");
+          res.success("Trip denied by this driver");
         }, error: function() {
           res.error("Error while Updating the trip");
         }
