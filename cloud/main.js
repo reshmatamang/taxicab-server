@@ -182,6 +182,8 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             //trip saved
             res.success(savedTrip);
 
+            console.log("savedTrip");
+
             console.log(savedTrip);
 
             var tripId = savedTrip.get("objectId")||"12345";
