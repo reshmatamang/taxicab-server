@@ -76,14 +76,23 @@ Parse.Cloud.define('pushData', function(request, response) {
 
 
 /**
+
+Cloud function for user initiating trip.
+Parameters:
+userId, driverId
+
+
 TripStatus:
+
 'requested',
-'accepted',
+'confirmed',
 'driver-notfound',
+'done'
 'error'
 
 
-Trip States:
+Trip States: These are internal
+
 'user-initiated-trip-request'
 'user-canceled-trip-request'
 'trip-request-sent-to-driver'
@@ -189,6 +198,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
               customData: {
                 userId: userId,
                 tripId: tripId,
+                driverId: driverId,
                 "text": "User requesting for taxi. Can you pick this user?"
               }
             },{
@@ -216,4 +226,219 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
   Parse.Promise.when(promises).then(initiateTrip);
 
   
+});
+
+
+  /**
+Clud Function for Driver Accepting Trip request
+  **/
+
+
+Parse.Cloud.define('driverAcceptTrip', function(req, res) {
+  var driverId = req.params.driverId;
+  var tripId= req.params.tripId;
+  var promises = [];
+  var q1 = new Parse.Query(Parse.User);
+  var trip, driver;
+  var promise1 = q1.get(driverId, {
+    success: function (obj) {
+      console.log("driver");
+      console.log(obj);
+      driver = obj;
+      // promise1.resolve(obj);
+    },
+    error: function (obj, error) {
+      console.log("error user");
+      console.log(error);
+      // promise1.reject(error);
+    }
+  });
+  // promise1.then(function(val){console.log("value"); console.log(val);});
+
+  promises.push(promise1);
+
+  var q2 = new Parse.Query("Trip";
+  var promise2 = q2.get(tripId, {
+    success: function (obj) {
+      console.log("trip");
+      console.log(obj);
+      trip = obj;
+      // promise2.resolve(obj);
+    },
+    error: function (obj, error) {
+      console.log(error);
+      // promise2.reject(error);
+    }
+  });
+
+  promises.push(promise2);
+
+  var  assignTripDriver = function () {
+
+    if (driver && trip && trip.get('status') != 'confirmed') {
+      trip.save({
+        'status': 'confirmed',
+        'state': 'driver-accepted-trip-request',
+        'driver': driver
+      }, {
+        success: function () {
+          res.success("Trip initiated for this driver");
+        }, error: function() {
+          res.error("Error while Updating the trip");
+        }
+      });
+
+    } else {
+      res.error("Error while finding driver and trip");
+    }
+
+  };
+
+  Parse.Promise.when(promises).then(assignTripDriver);
+
+});
+
+  /**
+
+Clud Function for Driver Denying Trip request
+  */
+
+
+  Parse.Cloud.define('driverDenyTrip', function(req, res) {
+  var driverId = req.params.driverId;
+  var tripId= req.params.tripId;
+  var promises = [];
+  var q1 = new Parse.Query(Parse.User);
+  var trip, driver;
+  var promise1 = q1.get(driverId, {
+    success: function (obj) {
+      console.log("driver");
+      console.log(obj);
+      driver = obj;
+      // promise1.resolve(obj);
+    },
+    error: function (obj, error) {
+      console.log("error user");
+      console.log(error);
+      // promise1.reject(error);
+    }
+  });
+  // promise1.then(function(val){console.log("value"); console.log(val);});
+
+  promises.push(promise1);
+
+  var q2 = new Parse.Query("Trip";
+  var promise2 = q2.get(tripId, {
+    success: function (obj) {
+      console.log("trip");
+      console.log(obj);
+      trip = obj;
+      // promise2.resolve(obj);
+    },
+    error: function (obj, error) {
+      console.log(error);
+      // promise2.reject(error);
+    }
+  });
+
+  promises.push(promise2);
+
+  var  drnyTrip = function () {
+
+    if (driver && trip) {
+      trip.add('deniedDriver', driver);
+      trip.save({
+      }, {
+        success: function () {
+          res.success("Trip denied for this driver");
+        }, error: function() {
+          res.error("Error while Updating the trip");
+        }
+      });
+
+    } else {
+      res.error("Error while finding driver and trip");
+    }
+
+  };
+
+  Parse.Promise.when(promises).then(drnyTrip);
+
+});
+
+
+var driverAssignJob = function (trip) {
+  var tripState = trip.get('state'),
+      userId = trip.get('user').get('objectId'),
+      tripId = trip.get('objectId');
+      status = trip.get('status'),
+      currentDriver = trip.get('driver'),
+      nextDrivers = trip.get('nextDrivers');
+
+  if (tripState == 'driver-accepted-trip-request') {
+    //driver accepted trip. No need to for further process
+    trip.set('status', 'confirmed');
+    trip.save();
+  } else if(nextDrivers && nextDrivers.length == 0) {
+    //no more drivers for the trip
+    trip.set('status', 'driver-notfound');
+    trip.set('state', 'driver-notfound');
+    trip.add('declinedDriver', currentDriver);
+    trip.set('driver', '');
+    trip.save();
+
+  } else {
+    //process trip request for next driver
+    trip.add('declinedDriver', currentDriver);
+    var nextDriverId = nextDrivers.shift();
+    var nextDriver;
+    var driverQ = Parse.Query(Parse.User);
+    driverQ.get(nextDriverId, {
+      success: function(result) {
+        nextDriver = result;
+
+        if (nextDriver.get('state') == 'active') {
+          //push data to driver
+          Parse.Cloud.run('pushData', {
+            ownerId: nextDriverId,
+            customData: {
+              userId: userId,
+              tripId: tripId,
+              "text": "User requesting for taxi. Can you pick this user?"
+            }
+          },{
+            success: function (result) {
+              console.log(result);
+            },
+            error: function (error) {
+              console.log(error);
+            }
+          });
+        } else {
+          //driver not available. go to next driver
+          driverAssignJob(trip);
+        }
+
+        
+
+      }, error: function(error) {
+        console.log(error);
+        //execute trip for next drivers
+        driverAssignJob(trip);
+      }
+    });
+    trip.set('driver', );
+  }
+};
+
+Parse.Cloud.define('initiateTrip2', function(req, res) {
+  var userId = req.params.userId;
+  var drivers= req.params.drivers;
+  console.log(drivers);
+  var currDriverId = drivers.shift();
+
+
+  var recurringJob;
+
+
 });
