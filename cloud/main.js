@@ -404,9 +404,11 @@ Parse.Cloud.define('driverReachedUser', function(req, res) {
             },{
               success: function (result) {
                 console.log(result);
+                res.success("User informed about you arrived for pickup");
               },
               error: function (error) {
                 console.log(error);
+                res.error("Error while sending info to user");
               }
             });
 
