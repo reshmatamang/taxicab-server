@@ -388,7 +388,7 @@ Parse.Cloud.define('driverReachedUser', function(req, res) {
       trip = obj;
       if (trip) {
           //get the user for the trip
-          var user = trip.get("_p_user");
+          var user = trip["_p_user"];
           if (user) {
             //push data to user
             var userId = user.get("objectId");
