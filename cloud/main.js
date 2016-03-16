@@ -392,7 +392,7 @@ Parse.Cloud.define('driverReachedUser', function(req, res) {
           if (user) {
             //push data to user
             console.log(user);
-            var userId = user.get("objectId");
+            var userId = user.id;
             Parse.Cloud.run('pushData', {
               ownerId: userId,
               customData: {
