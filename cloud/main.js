@@ -391,6 +391,7 @@ Parse.Cloud.define('driverReachedUser', function(req, res) {
           var user = trip.get('user');
           if (user) {
             //push data to user
+            console.log(user);
             var userId = user.get("objectId");
             Parse.Cloud.run('pushData', {
               ownerId: userId,
