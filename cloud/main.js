@@ -306,6 +306,7 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
 
 Clud Function for Driver Denying Trip request
   */
+
   Parse.Cloud.define('driverDenyTrip', function(req, res) {
   var driverId = req.params.driverId;
   var tripId= req.params.tripId;
@@ -386,6 +387,7 @@ Parse.Cloud.define('driverReachedUser', function(req, res) {
       driver = obj;
       if (driver) {
         var tripId = driver.get('currentTripId');
+        console.log("TripId" + tripId);
         var q2 = new Parse.Query("Trip");
         var promise2 = q2.get(tripId, {
           success: function (obj) {
