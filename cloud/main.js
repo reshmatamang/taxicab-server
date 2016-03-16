@@ -275,7 +275,7 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
 
   var  assignTripDriver = function () {
 
-    // if (driver && trip && trip.get('status') != 'confirmed') {
+    if (driver && trip && trip.get('status') != 'confirmed') {
       driver.set({
         'currentTripId': tripId
       });
@@ -292,9 +292,9 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
         }
       });
 
-    // } else {
-    //   res.error("Error while finding driver and trip");
-    // }
+    } else {
+      res.error("Error while finding driver and trip");
+    }
 
   };
 
