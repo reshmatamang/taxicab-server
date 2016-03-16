@@ -283,7 +283,7 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
       trip.save({
         'status': 'confirmed',
         'state': 'driver-accepted-trip-request',
-        'driver': driver.toJSON();
+        'driver': driver.toJSON()
       }, {
         success: function () {
           res.success("Trip initiated for this driver");
