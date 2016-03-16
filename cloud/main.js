@@ -399,7 +399,7 @@ Parse.Cloud.define('driverReachedUser', function(req, res) {
                 userId: userId,
                 tripId: tripId,
                 driverId: driverId,
-                "text": "Taxi reached you. You can get in the car."
+                "text": "Taxi Arrived. You can get in the car."
               }
             },{
               success: function (result) {
