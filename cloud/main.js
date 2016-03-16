@@ -275,7 +275,11 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
 
   var  assignTripDriver = function () {
 
-    if (driver && trip && trip.get('status') != 'confirmed') {
+    // if (driver && trip && trip.get('status') != 'confirmed') {
+      driver.set({
+        'currentTripId': tripId
+      });
+      driver.save();
       trip.save({
         'status': 'confirmed',
         'state': 'driver-accepted-trip-request',
@@ -288,9 +292,9 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
         }
       });
 
-    } else {
-      res.error("Error while finding driver and trip");
-    }
+    // } else {
+    //   res.error("Error while finding driver and trip");
+    // }
 
   };
 
@@ -302,8 +306,6 @@ Parse.Cloud.define('driverAcceptTrip', function(req, res) {
 
 Clud Function for Driver Denying Trip request
   */
-
-
   Parse.Cloud.define('driverDenyTrip', function(req, res) {
   var driverId = req.params.driverId;
   var tripId= req.params.tripId;
@@ -366,6 +368,84 @@ Clud Function for Driver Denying Trip request
 
 });
 
+
+/**
+Cloud function for driver ready to pick customer
+**/
+
+Parse.Cloud.define('driverReachedUser', function(req, res) {
+  var driverId = req.params.driverId;
+  var driver, trip;
+  var promises = [];
+
+  var q1 = new Parse.Query(Parse.User);
+  var promise1 = q1.get(driverId, {
+    success: function (obj) {
+      console.log("drive");
+      console.log(obj);
+      driver = obj;
+      if (driver) {
+        var tripId = driver.get('currentTripId');
+        var q2 = new Parse.Query("Trip");
+        var promise2 = q2.get(tripId, {
+          success: function (obj) {
+            console.log("trip");
+            console.log(obj);
+            trip = obj;
+
+            if (trip) {
+              //get the user for the trip
+              var user = trip.get("user");
+              if (user) {
+                //push data to user
+                var userId = user.get("objectId");
+                Parse.Cloud.run('pushData', {
+                  ownerId: userId,
+                  customData: {
+                    userId: userId,
+                    tripId: tripId,
+                    driverId: driverId,
+                    "text": "Taxi reached you. You can get in the car."
+                  }
+                },{
+                  success: function (result) {
+                    console.log(result);
+                  },
+                  error: function (error) {
+                    console.log(error);
+                  }
+                });
+
+              } else {
+                res.error("Error while finding trip user");
+              }
+
+            } else {
+              res.error("Error while finding driver and trip");
+            }
+          },
+          error: function (obj, error) {
+            console.log(error);
+            res.error("Error while finding trip info");
+          }
+        });
+      } else {
+        res.error("Error while finding driver info");
+      }
+      
+    },
+    error: function (obj, error) {
+      console.log(error);
+      res.error("Error while processing request");
+    }
+  });
+
+});
+
+
+/**
+Scheduled job for monitoring the trip status
+**/
 
 var driverAssignJob = function (trip) {
   var tripState = trip.get('state'),
