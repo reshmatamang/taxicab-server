@@ -83,7 +83,6 @@ userId, driverId
 
 
 TripStatus:
-
 'requested',
 'confirmed',
 'driver-notfound',
@@ -110,6 +109,7 @@ Trip States: These are internal
 Parse.Cloud.define('initiateTrip', function(req, res) {
   var userId = req.params.userId;
   var driverId = req.params.driverId;
+  var sourceLocation = req.params.sourceLocation;
   var promises = [];
 
   // var ProjectNumner = "956242433297".
@@ -181,7 +181,8 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
           user: user,
           driver: driver,
           state: 'user-initiated-trip-request',
-          status: 'requested'
+          status: 'requested',
+          sourceLocation: sourceLocation
         }, {
           success: function(savedTrip) {
             //trip saved
@@ -225,7 +226,6 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
 
   Parse.Promise.when(promises).then(initiateTrip);
 
-  
 });
 
 
