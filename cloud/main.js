@@ -399,7 +399,66 @@ Parse.Cloud.define('driverReachedUser', function(req, res) {
                 userId: userId,
                 tripId: tripId,
                 driverId: driverId,
-                "text": "Taxi Arrived. You can get in the car."
+                "text": "Taxi Arrived. Go find him.",
+                "title": "Taxi arrived",
+                "type": "taxiArrived"
+              }
+            },{
+              success: function (result) {
+                console.log(result);
+                res.success("User informed about you arrived for pickup");
+              },
+              error: function (error) {
+                console.log(error);
+                res.error("Error while sending info to user");
+              }
+            });
+
+          } else {
+            res.error("Error while finding trip user");
+          }
+
+        } else {
+          res.error("Error while finding driver and trip");
+        }
+      
+    },
+    error: function (obj, error) {
+      console.log(error);
+      res.error("Error while processing request");
+    }
+  });
+
+});
+
+Parse.Cloud.define('reachedDestination', function(req, res) {
+  var driverId = req.params.driverId;
+  var tripId = req.params.tripId;
+  var driver, trip;
+  var promises = [];
+
+  var q1 = new Parse.Query("Trip").include(Parse.User);
+  var promise1 = q1.get(tripId, {
+    success: function (obj) {
+      console.log("trip");
+      console.log(obj);
+      trip = obj;
+      if (trip) {
+          //get the user for the trip
+          var user = trip.get('user');
+          if (user) {
+            //push data to user
+            console.log(user);
+            var userId = user.id;
+            Parse.Cloud.run('pushData', {
+              ownerId: userId,
+              customData: {
+                userId: userId,
+                tripId: tripId,
+                driverId: driverId,
+                "text": "You have arrived. Thanks you for riding with us.",
+                "title": "Arrived Destination",
+                "type": "destinationArrived"
               }
             },{
               success: function (result) {
