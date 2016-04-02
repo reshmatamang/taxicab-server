@@ -193,6 +193,18 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             driver.set("currentTripId", tripId);
             user.save();
             driver.save();
+            var userName = user.get('name');
+            var userProfileImage = user.get('profileImage')||"";
+            var pickupLocation = user.get('pickUpLocation').get('text');
+            var destLocation = user.get('destLocation').get('text');
+            var msg = userName + " needs a ride. ";
+            if (pickupLocation && pickupLocation.length > 0) {
+              msg += "Pickup Location: " + pickupLocation + ". ";
+            }
+            if (destLocation && destLocation.length > 0) {
+              msg += "Destination Location: " + destLocation + ". ";
+            }
+            msg += "Can you pick " + userName + "?";
             //push data to driver
             Parse.Cloud.run('pushData', {
               ownerId: driverId,
@@ -200,7 +212,8 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
                 userId: userId,
                 tripId: tripId,
                 driverId: driverId,
-                "text": "User requesting for taxi. Can you pick this user?"
+                userProfileImage: userProfileImage,
+                "text": msg
               }
             },{
               success: function (result) {
@@ -463,7 +476,7 @@ Parse.Cloud.define('reachedDestination', function(req, res) {
             },{
               success: function (result) {
                 console.log(result);
-                res.success("User informed about you arrived for pickup");
+                res.success("User informed about destination arrived");
               },
               error: function (error) {
                 console.log(error);
