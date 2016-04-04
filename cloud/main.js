@@ -1,12 +1,7 @@
 Parse.Cloud.define('pushData', function(request, response) {
+  console.log("Start pushData");
   var params = request.params;
   var ownerId = params.ownerId;
-  // var tripId = params.tripId;
-  // var trip = params.trip;
-
-  // To be used with:
-  // https://github.com/codepath/ParsePushNotificationExample
-  // See https://github.com/codepath/ParsePushNotificationExample/blob/master/app/src/main/java/com/test/MyCustomReceiver.java
   var customData = params.customData;
   var launch = params.launch;
   var broadcast = params.broadcast;
@@ -30,6 +25,8 @@ Parse.Cloud.define('pushData', function(request, response) {
       payload.broadcast = broadcast;
   }
 
+  console.log("executing parse push");
+
   // Note that useMasterKey is necessary for Push notifications to succeed.
   Parse.Push.send({
     where: pushQuery,      // for sending to a specific channel
@@ -44,30 +41,6 @@ Parse.Cloud.define('pushData', function(request, response) {
      useMasterKey: true
    });
 
-  // var setConfirm = function(tripId) {
-
-  //   var qr = new Parse.Query("Trip");
-
-  //   console.log("tripId: " + tripId);
-
-  //   var pr = qr.get(tripId, {
-  //     success: function (obj) {
-  //       console.log("success trip");
-  //       trip = obj;
-  //       trip.set("status", "confirmed");
-  //       // promise1.resolve(obj);
-  //     },
-  //     error: function (obj, error) {
-  //       console.log("error trip");
-  //       console.log(error);
-  //       // promise1.reject(error);
-  //     }
-  //   });
-  // };
-
-  // console.log("tripID before timeout:" + tripId);
-
-  // setTimeout(setConfirm, 30000, tripId);
 
   response.success('success');
 });
@@ -168,7 +141,10 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
 
   var initiateTrip = function () {
     //validate if driver and user not null
+      console.log("Start initiateTrip");
+      console.log("User:");
       console.log(user);
+      Console.log("Driver:");
       console.log(driver);
     if (user && driver) {
       
@@ -188,32 +164,24 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             //trip saved
             res.success(savedTrip);
 
+            console.log("Trip Created Successfully, TripObject");
+            console.log(savedTrip);
+
             var tripId = savedTrip.id||"12345";
             user.set("currentTripId", tripId);
             driver.set("currentTripId", tripId);
             user.save();
             driver.save();
-            var userName = user.get('name');
-            var userProfileImage = user.get('profileImage')||"";
-            var pickupLocation = user.get('pickUpLocation').get('text');
-            var destLocation = user.get('destLocation').get('text');
-            var msg = userName + " needs a ride. ";
-            if (pickupLocation && pickupLocation.length > 0) {
-              msg += "Pickup Location: " + pickupLocation + ". ";
-            }
-            if (destLocation && destLocation.length > 0) {
-              msg += "Destination Location: " + destLocation + ". ";
-            }
-            msg += "Can you pick " + userName + "?";
+            
             //push data to driver
+            console.log("Initiate Push Notification. Invoking pushData");
             Parse.Cloud.run('pushData', {
               ownerId: driverId,
               customData: {
                 userId: userId,
                 tripId: tripId,
                 driverId: driverId,
-                userProfileImage: userProfileImage,
-                "text": msg
+                "text": "New Ride request. Can you pick the customer?"
               }
             },{
               success: function (result) {
