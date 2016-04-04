@@ -107,7 +107,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
   var user, driver;
   var promise1 = q1.get(userId, {
     success: function (obj) {
-      console.log("user");
+      console.log("User:");
       console.log(obj);
       user = obj;
       // promise1.resolve(obj);
@@ -125,7 +125,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
   var q2 = new Parse.Query(Parse.User);
   var promise2 = q2.get(driverId, {
     success: function (obj) {
-      console.log("drive");
+      console.log("Driver:");
       console.log(obj);
       driver = obj;
       // promise2.resolve(obj);
@@ -142,10 +142,6 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
   var initiateTrip = function () {
     //validate if driver and user not null
       console.log("Start initiateTrip");
-      console.log("User:");
-      console.log(user);
-      Console.log("Driver:");
-      console.log(driver);
     if (user && driver) {
       
       // if (driver.get('state') == 'active') {
@@ -172,7 +168,7 @@ Parse.Cloud.define('initiateTrip', function(req, res) {
             driver.set("currentTripId", tripId);
             user.save();
             driver.save();
-            
+
             //push data to driver
             console.log("Initiate Push Notification. Invoking pushData");
             Parse.Cloud.run('pushData', {
